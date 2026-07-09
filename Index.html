@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सिनेमैटिक रियलिस्टिक कैरम क्लब Pro - Ultimate Plus Edition</title>
+    <style>
+        :root {
+            --primary: #dfb76c;
+            --bg-dark: #0f0f13;
+            --panel-bg: rgba(30, 30, 38, 0.75);
+            --neon-glow: rgba(223, 183, 108, 0.3);
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at center, #1e1e24 0%, #0a0a0d 100%);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        .setup-screen {
+            position: absolute;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 25px 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid rgba(223, 183, 108, 0.4);
+            text-align: center;
+            z-index: 100;
+            width: 340px;
+        }
+
+        .setup-step {
+            display: none;
+        }
+        .setup-step.active {
+            display: block;
+        }
+
+        .setup-btn {
+            background: linear-gradient(135deg, #dfb76c, #b3893c);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(223, 183, 108, 0.2);
+        }
+
+        .setup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(223, 183, 108, 0.4);
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 580px;
+            max-width: 94vw;
+            margin-bottom: 6px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.05);
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .player-box {
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            flex: 1;
+            margin: 0 6px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .player-box.active {
+            background: linear-gradient(135deg, rgba(223, 183, 108, 0.15), rgba(179, 137, 60, 0.05));
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        .coin-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .white-ind { background: #ffffff; border: 1px solid #ddd; }
+        .black-ind { background: #1a1a1a; border: 1px solid #444; }
+
+        .queen-indicator {
+            display: none;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+            animation: pulse 1.2s infinite alternate;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.95); opacity: 0.8; }
+            to { transform: scale(1.03); opacity: 1; }
+        }
+
+        .control-panel {
+            width: 580px;
+            max-width: 94vw;
+            text-align: center;
+            padding: 4px 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .control-panel.disabled {
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .speed-control-panel {
+            width: 580px;
+            max-width: 94vw;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 6px 16px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .speed-slider {
+            -webkit-appearance: none;
+            width: 60%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+        }
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #27ae60;
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+
+        .striker-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            margin: 10px 0;
+        }
+
+        .striker-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            border: 2px solid #fff;
+            transition: transform 0.1s;
+        }
+        .striker-slider::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        #carromBoard {
+            background: #f7e5c4; 
+            border: 28px solid #2b1608; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.45);
+            border-radius: 24px;
+            width: 620px;
+            height: 620px;
+            max-width: 94vw;
+            max-height: 94vw;
+            z-index: 5;
+        }
+
+        .turn-info {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.5px;
+        }
+
+        #status-msg {
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 15px;
+            min-height: 24px;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        #confettiCanvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confettiCanvas"></canvas>
+
+    <div id="setupScreen" class="setup-screen">
+        <h2 style="color: var(--primary); margin-top: 0; font-size: 22px;">कैरम क्लब प्रो 3D</h2>
+        
+        <!-- Step 1: Game Mode Select -->
+        <div id="step-mode" class="setup-step active">
+            <p style="margin-top: 10px; margin-bottom: 12px; font-size: 15px;">खेलने का तरीका चुनें:</p>
+            <button class="setup-btn" onclick="selectMode(false)">2 Players (PvP)</button>
+            <button class="setup-btn" onclick="selectMode(true)" style="background: #2980b9; color: #fff;">Vs Computer (AI)</button>
+        </div>
+
+        <!-- Step 2: Coin Color Select -->
+        <div id="step-color" class="setup-step">
+            <p style="margin-top: 10px; margin-bottom: 8px; font-size: 14px;">अपनी गोटी का रंग चुनें:</p>
+            <button class="setup-btn" onclick="finishSetup('white')">सफेद</button>
+            <button class="setup-btn" onclick="finishSetup('black')" style="background: #222; color: #fff; border: 1px solid #444;">काली</button>
+        </div>
+    </div>
+
+    <div id="status-msg"></div>
+
+    <div class="scoreboard" id="mainScoreboard">
+        <div id="p1-box" class="player-box active">
+            <div style="display: flex; justify-content: center; align-items: center; font-weight: 600;">
+                <span id="p1-name">خिलाड़ी 1</span>
+                <span id="p1-queen" class="queen-indicator">QUEEN 👑</span>
+            </div>
+            <div style="font-size: 18px; margin-top: 4px; font-weight: 700;">
+                <span id="p1-dot" class="coin-indicator white-ind"></span><span id="p1-score">0</span>
+            </div>
+        </div>
+        <div id="p2-box" class="player-box">
+            <div style="display: flex; justify-content: center; align-items: center; font-weight: 600;">
+                <span id="p2-name">خिलाड़ी 2</span>
+                <span id="p2-queen" class="queen-indicator">QUEEN 👑</span>
+            </div>
+            <div style="font-size: 18px; margin-top: 4px; font-weight: 700;">
+                <span id="p2-dot" class="coin-indicator black-ind"></span><span id="p2-score">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="speed-control-panel">
+        <span>⚡ स्ट्राइकर पावर मोड:</span>
+        <input type="range" id="speedMultiplierSlider" class="speed-slider" min="0.10" max="0.35" step="0.01" value="0.18">
+        <span id="speedValText" style="color: #27ae60; font-weight: bold; width: 40px; text-align: right;">0.18</span>
+    </div>
+
+    <div id="p2-panel" class="control-panel disabled">
+        <div class="turn-info" id="p2-turn-text">خिलाड़ी 2 की चाल... बोर्ड पर या स्लाइडर से सेट करें</div>
+        <input type="range" id="p2Slider" class="striker-slider" min="110" max="510" value="310">
+    </div>
+
+    <canvas id="carromBoard" width="620" height="620"></canvas>
+
+    <div id="p1-panel" class="control-panel">
+        <div class="turn-info">خिलाड़ी 1 की चाल... बोर्ड पर या स्लाइडर से सेट करें और ड्रैग करके शॉट मारें</div>
+        <input type="range" id="p1Slider" class="striker-slider" min="110" max="510" value="310">
+    </div>
+
+    <script>
+        let p1CoinType = 'white'; 
+        let p2CoinType = 'black';
+        let gameReady = false;
+        let gameOver = false;
+        let vsComputer = false; 
+
+        let STRIKER_SPEED_MULTIPLIER = 0.18; 
+
+        const canvas = document.getElementById('carromBoard');
+        const p1Slider = document.getElementById('p1Slider');
+        const p2Slider = document.getElementById('p2Slider');
+        const p1Panel = document.getElementById('p1-panel');
+        const p2Panel = document.getElementById('p2-panel');
+        const statusMsg = document.getElementById('status-msg');
+        const speedSlider = document.getElementById('speedMultiplierSlider');
+        const speedText = document.getElementById('speedValText');
+        const ctx = canvas.getContext('2d');
+
+        const W = canvas.width;
+        const H = canvas.height;
+        const FRICTION = 0.985; 
+        const RESTITUTION = 0.83; 
+
+        const holes = [
+            { id: 0, x: 42, y: 42, r: 28 },   { id: 1, x: W - 42, y: 42, r: 28 },
+            { id: 2, x: 42, y: H - 42, r: 28 }, { id: 3, x: W - 42, y: H - 42, r: 28 }
+        ];
+
+        let coins = [];
+        const COIN_RADIUS = 19;      
+        const STRIKER_RADIUS = 27;   
+
+        let currentPlayer = 1; 
+        let scores = { player1: 0, player2: 0 };
+        let turnInProgress = false;
+
+        let queenSunkThisTurn = false;
+        let queenSunkByPlayer = 0; 
+        let queenWaitingForCover = false; 
+
+        let ownCoinSunk = false;
+        let opponentCoinSunk = false;
+        let strikerFouled = false;
+
+        let striker = {
+            x: W / 2, y: H - 105, r: STRIKER_RADIUS,
+            vx: 0, vy: 0, isDragging: false, color: '#f39c12', isStriker: true
+        };
+
+        let aimX = 0, aimY = 0;
+        let strikerHistory = [];
+        let shockwaves = [];
+        
+        // नए एनिमेटेड ट्रांजिशन एरेज़ (Cinematic Dynamic Travels)
+        let fallingCoins = []; 
+        let activeRespawns = []; 
+
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {}
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+        }
+
+        function playSynthSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx || audioCtx.state === 'suspended') return;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                let now = audioCtx.currentTime;
+
+                if (type === 'hit') { 
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+                    gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                } else if (type === 'border') { 
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(100, now);
+                    osc.frequency.exponentialRampToValueAtTime(30, now + 0.12);
+                    gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now); osc.stop(now + 0.12);
+                } else if (type === 'pocket') { 
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.quadraticRampToValueAtTime(80, now + 0.2);
+                    gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                }
+            } catch(e) {}
+        }
+
+        function addShockwave(x, y, maxRadius = 50) {
+            shockwaves.push({ x: x, y: y, r: 10, maxR: maxRadius, alpha: 1 });
+        }
+
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let confettiParticles = [];
+
+        function showMessage(text, isError = true) {
+            statusMsg.innerText = text;
+            statusMsg.style.color = isError ? "#ff4757" : "#2ed573";
+            setTimeout(() => { if(statusMsg.innerText === text) statusMsg.innerText = ""; }, 4500);
+        }
+
+        speedSlider.addEventListener('input', function() {
+            STRIKER_SPEED_MULTIPLIER = parseFloat(this.value);
+            speedText.innerText = STRIKER_SPEED_MULTIPLIER.toFixed(2);
+        });
+
+        function selectMode(isComp) {
+            vsComputer = isComp;
+            document.getElementById('step-mode').classList.remove('active');
+            document.getElementById('step-color').classList.add('active');
+        }
+
+        function finishSetup(choice) {
+            initAudio(); 
+            p1CoinType = choice;
+            p2CoinType = (choice === 'white') ? 'black' : 'white';
+
+            document.getElementById('p1-name').innerText = `खिलाड़ी 1`;
+            document.getElementById('p2-name').innerText = vsComputer ? `कंप्यूटर (AI)` : `खिलाड़ी 2`;
+            if(vsComputer) document.getElementById('p2-turn-text').innerText = "कंप्यूटर सोच रहा है...";
+
+            document.getElementById('p1-dot').className = `coin-indicator ${p1CoinType}-ind`;
+            document.getElementById('p2-dot').className = `coin-indicator ${p2CoinType}-ind`;
+
+            document.getElementById('setupScreen').style.display = 'none';
+            resizeConfettiCanvas();
+            gameReady = true;
+            initCoins();
+            updateSliderPanels();
+        }
+
+        function initCoins() {
+            coins = [];
+            const cx = W / 2; const cy = H / 2;
+            coins.push({ x: cx, y: cy, r: COIN_RADIUS, vx: 0, vy: 0, color: '#ff2d55', type: 'queen' });
+
+            for (let i = 0; i < 6; i++) {
+                let angle = (i * Math.PI * 2) / 6;
+                let type = (i % 2 === 0) ? 'white' : 'black';
+                let color = type === 'white' ? '#ffffff' : '#2d3436';
+                coins.push({ x: cx + Math.cos(angle) * 40, y: cy + Math.sin(angle) * 40, r: COIN_RADIUS, vx: 0, vy: 0, color: color, type: type });
+            }
+
+            for (let i = 0; i < 12; i++) {
+                let angle = (i * Math.PI * 2) / 12;
+                let type = (i % 2 === 0) ? 'white' : 'black';
+                let color = type === 'white' ? '#ffffff' : '#2d3436';
+                coins.push({ x: cx + Math.cos(angle) * 78, y: cy + Math.sin(angle) * 78, r: COIN_RADIUS, vx: 0, vy: 0, color: color, type: type });
+            }
+            coins.push(striker);
+        }
+
+        p1Slider.addEventListener('input', function() {
+            if (turnInProgress || currentPlayer !== 1 || !gameReady) return;
+            striker.x = parseInt(this.value);
+        });
+
+        p2Slider.addEventListener('input', function() {
+            if (turnInProgress || currentPlayer !== 2 || vsComputer || !gameReady) return;
+            striker.x = parseInt(this.value);
+        });
+
+        function updateSliderPanels() {
+            if (turnInProgress || !gameReady || gameOver) {
+                p1Panel.classList.add('disabled');
+                p2Panel.classList.add('disabled');
+            } else {
+                if (currentPlayer === 1) {
+                    p1Panel.classList.remove('disabled');
+                    p2Panel.classList.add('disabled');
+                } else {
+                    p1Panel.classList.add('disabled');
+                    if(!vsComputer) p2Panel.classList.remove('disabled');
+                }
+            }
+        }
+
+        // एनिमेटेड रीस्पॉन फ़ंक्शन (Slide to Center Animation)
+        function respawnCoinWithAnimation(type) {
+            let color = type === 'white' ? '#ffffff' : (type === 'black' ? '#2d3436' : '#ff2d55');
+            let offset = 0; let finalX = W/2; let finalY = H/2;
+            
+            while(coins.some(c => !c.isStriker && Math.hypot(c.x - finalX, c.y - finalY) < COIN_RADIUS * 2)) {
+                offset += 8;
+                finalX = W/2 + (Math.random() - 0.5) * offset;
+                finalY = H/2 + (Math.random() - 0.5) * offset;
+            }
+
+            // एनीमेशन के लिए शुरुआती पॉइंट बॉर्डर के बाहर या ऊपर से सेट करें
+            activeRespawns.push({
+                startX: W/2, startY: -30,
+                currentX: W/2, currentY: -30,
+                targetX: finalX, targetY: finalY,
+                progress: 0, r: COIN_RADIUS, color: color, type: type
+            });
+        }
+
+        // पॉकेट एनिमेशन को ट्रिगर करने वाला मुख्य इंजन 
+        function animateCoinToScoreboard(coin, hole) {
+            // पता करें कि यह गोटी किस प्लेयर के खाते में गई या जानी चाहिए
+            let targetBoxId = (currentPlayer === 1) ? 'p1-box' : 'p2-box';
+            let rect = document.getElementById(targetBoxId).getBoundingClientRect();
+            let boardRect = canvas.getBoundingClientRect();
+
+            // कैनवास के सापेक्ष स्कोरबॉक्स की पोजीशन निकालें
+            let canvasTargetX = (rect.left + rect.width / 2) - boardRect.left;
+            let canvasTargetY = (rect.top + rect.height / 2) - boardRect.top;
+
+            fallingCoins.push({
+                x: coin.x, y: coin.y,
+                startX: coin.x, startY: coin.y,
+                holeX: hole.x, holeY: hole.y,
+                targetX: canvasTargetX, targetY: canvasTargetY,
+                r: coin.r, color: coin.color, type: coin.type,
+                stage: 'sink', // स्टेज 1: sink (डूबना), स्टेज 2: fly (उड़ना)
+                progress: 0
+            });
+        }
+
+        function switchTurn() {
+            if (gameOver) return;
+
+            if (queenWaitingForCover && queenSunkByPlayer === currentPlayer) {
+                if (!ownCoinSunk) {
+                    showMessage("कवर मिस हुआ! रानी वापस आई।");
+                    respawnCoinWithAnimation('queen');
+                    document.getElementById('p1-queen').style.display = 'none';
+                    document.getElementById('p2-queen').style.display = 'none';
+                    queenWaitingForCover = false; queenSunkByPlayer = 0;
+                } else {
+                    showMessage("लाजवाब! रानी का कवर पक्का हुआ (+3 अंक)।", false);
+                    let winnerQueenTag = document.getElementById(`p${currentPlayer}-queen`);
+                    if(winnerQueenTag) { winnerQueenTag.style.animation = 'none'; winnerQueenTag.style.background = '#27ae60'; }
+                    queenWaitingForCover = false; queenSunkByPlayer = 0;
+                }
+            }
+
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            striker.vx = 0; striker.vy = 0;
+            striker.x = W / 2;
+            striker.y = currentPlayer === 1 ? H - 105 : 105;
+
+            p1Slider.value = 310; p2Slider.value = 310;
+            turnInProgress = false;
+            updateSliderPanels();
+
+            document.getElementById('p1-box').classList.toggle('active', currentPlayer === 1);
+            document.getElementById('p2-box').classList.toggle('active', currentPlayer === 2);
+
+            if (currentPlayer === 2 && vsComputer && !gameOver) {
+                setTimeout(makeComputerMove, 800);
+            }
+        }
+
+        // कंप्यूटर AI चाल का लॉजिक
+        function makeComputerMove() {
+            if (!gameReady || gameOver || !vsComputer) return;
+
+            let targetType = p2CoinType;
+            let validTargets = coins.filter(c => !c.isStriker && (c.type === targetType || c.type === 'queen'));
+            if (validTargets.length === 0) validTargets = coins.filter(c => !c.isStriker);
+
+            if (validTargets.length > 0) {
+                let target = validTargets[Math.floor(Math.random() * validTargets.length)];
+                
+                // स्ट्राइकर पोजीशन को रैंडमली सेट करें
+                let bestStrikerX = 150 + Math.random() * 320;
+                striker.x = bestStrikerX;
+                p2Slider.value = bestStrikerX;
+
+                setTimeout(() => {
+                    let dx = target.x - striker.x;
+                    let dy = target.y - striker.y;
+                    let dist = Math.hypot(dx, dy);
+
+                    // रैंडम फोर्स जनरेट करें ताकि गेम नेचुरल लगे
+                    let force = 12 + Math.random() * 8;
+                    striker.vx = (dx / dist) * force;
+                    striker.vy = (dy / dist) * force;
+
+                    turnInProgress = true;
+                    ownCoinSunk = false; opponentCoinSunk = false; strikerFouled = false; queenSunkThisTurn = false;
+                    updateSliderPanels();
+                }, 600);
+            }
+        }
+
+        function getMousePos(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: (clientX - rect.left) * (W / rect.width), y: (clientY - rect.top) * (H / rect.height) };
+        }
+
+        function startDrag(clientX, clientY) {
+            initAudio();
+            if (turnInProgress || !gameReady || (currentPlayer === 2 && vsComputer)) return;
+            const pos = getMousePos(clientX, clientY);
+            
+            const activeBaselineY = (currentPlayer === 1) ? H - 105 : 105;
+            if (Math.abs(pos.y - activeBaselineY) < 35 && pos.x >= 110 && pos.x <= 510) {
+                striker.x = pos.x;
+                if (currentPlayer === 1) p1Slider.value = pos.x;
+                else p2Slider.value = pos.x;
+            }
+
+            let dist = Math.hypot(pos.x - striker.x, pos.y - striker.y);
+            if (dist < striker.r + 35) {
+                striker.isDragging = true; aimX = pos.x; aimY = pos.y;
+            }
+        }
+
+        function doDrag(clientX, clientY) {
+            if (!striker.isDragging) return;
+            const pos = getMousePos(clientX, clientY);
+            aimX = pos.x; aimY = pos.y;
+        }
+
+        function endDrag() {
+            if (!striker.isDragging) return;
+            striker.isDragging = false;
+
+            let dx = striker.x - aimX; let dy = striker.y - aimY;
+            striker.vx = dx * STRIKER_SPEED_MULTIPLIER;
+            striker.vy = dy * STRIKER_SPEED_MULTIPLIER;
+            
+            if(Math.abs(striker.vx) > 0.4 || Math.abs(striker.vy) > 0.4) {
+                turnInProgress = true; ownCoinSunk = false; opponentCoinSunk = false; strikerFouled = false; queenSunkThisTurn = false;
+                updateSliderPanels(); 
+            }
+        }
+
+        canvas.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+        canvas.addEventListener('mousemove', (e) => doDrag(e.clientX, e.clientY));
+        window.addEventListener('mouseup', endDrag);
+        canvas.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY); });
+        canvas.addEventListener('touchmove', (e) => { if(e.touches.length === 1) { if(striker.isDragging) e.preventDefault(); doDrag(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+        window.addEventListener('touchend', endDrag);
+
+        function drawBoard() {
+            ctx.fillStyle = '#f5ddb2'; ctx.fillRect(0,0,W,H);
+            holes.forEach(h => { ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(h.x, h.y, h.r + 5, 0, Math.PI * 2); ctx.fill(); });
+
+            ctx.strokeStyle = 'rgba(139, 69, 19, 0.45)'; ctx.lineWidth = 2.5;
+            ctx.strokeRect(100, 100, W - 200, H - 200); ctx.strokeRect(110, 110, W - 220, H - 220);
+
+            const baseCircles = [{x:105, y:105}, {x:W-105, y:105}, {x:105, y:H-105}, {x:W-105, y:H-105}];
+            baseCircles.forEach(bc => {
+                ctx.fillStyle = '#d63031'; ctx.beginPath(); ctx.arc(bc.x, bc.y, 8, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = 'rgba(139, 69, 19, 0.6)'; ctx.beginPath(); ctx.arc(bc.x, bc.y, 13, 0, Math.PI*2); ctx.stroke();
+            });
+
+            ctx.strokeStyle = '#d63031'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(W/2, H/2, 52, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(139, 69, 19, 0.5)'; ctx.beginPath(); ctx.arc(W/2, H/2, 58, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = '#d63031'; ctx.beginPath(); ctx.arc(W/2, H/2, 7, 0, Math.PI * 2); ctx.fill();
+
+            holes.forEach(hole => {
+                ctx.fillStyle = '#050505'; ctx.beginPath(); ctx.arc(hole.x, hole.y, hole.r, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#c5a059'; ctx.lineWidth = 3.5; ctx.stroke();
+            });
+        }
+
+        function updatePhysics() {
+            if (!gameReady || gameOver) return;
+            let moving = false;
+
+            // सब-स्टेपिंग फिजिक्स टनलिंग रोकने के लिए
+            const subSteps = 3;
+            for (let step = 0; step < subSteps; step++) {
+                if (turnInProgress && (Math.abs(striker.vx) > 0.5 || Math.abs(striker.vy) > 0.5)) {
+                    strikerHistory.push({ x: striker.x, y: striker.y });
+                    if (strikerHistory.length > 6) strikerHistory.shift();
+                } else { strikerHistory = []; }
+
+                for (let i = shockwaves.length - 1; i >= 0; i--) {
+                    let sw = shockwaves[i];
+                    if(step === 0) { sw.r += 3; sw.alpha -= 0.05; if (sw.alpha <= 0 || sw.r >= sw.maxR) shockwaves.splice(i, 1); }
+                }
+
+                coins.forEach(c => {
+                    c.x += (c.vx / subSteps); c.y += (c.vy / subSteps);
+                    c.vx *= Math.pow(FRICTION, 1/subSteps); c.vy *= Math.pow(FRICTION, 1/subSteps);
+                    if (Math.abs(c.vx) < 0.05) c.vx = 0;
+                    if (Math.abs(c.vy) < 0.05) c.vy = 0;
+                    if (c.vx !== 0 || c.vy !== 0) moving = true;
+                });
+
+                coins.forEach(c => {
+                    const border = 28 + c.r; let hitBorder = false;
+                    if (c.x < border) { c.x = border; c.vx *= -1; hitBorder = true; }
+                    if (c.x > W - border) { c.x = W - border; c.vx *= -1; hitBorder = true; }
+                    if (c.y < border) { c.y = border; c.vy *= -1; hitBorder = true; }
+                    if (c.y > H - border) { c.y = H - border; c.vy *= -1; hitBorder = true; }
+                    if (hitBorder && Math.hypot(c.vx, c.vy) > 0.5) {
+                        playSynthSound('border'); if (c.isStriker) addShockwave(c.x, c.y, 40);
+                    }
+                });
+
+                for (let i = 0; i < coins.length; i++) {
+                    for (let j = i + 1; j < coins.length; j++) {
+                        let c1 = coins[i]; let c2 = coins[j];
+                        let dx = c2.x - c1.x; let dy = c2.y - c1.y;
+                        let dist = Math.hypot(dx, dy);
+
+                        if (dist < c1.r + c2.r) {
+                            let overlap = (c1.r + c2.r) - dist; let nx = dx / dist; let ny = dy / dist;
+                            c1.x -= nx * overlap * 0.5; c1.y -= ny * overlap * 0.5;
+                            c2.x += nx * overlap * 0.5; c2.y += ny * overlap * 0.5;
+
+                            let kx = c1.vx - c2.vx; let ky = c1.vy - c2.vy;
+                            let p = 2 * (nx * kx + ny * ky) / 2;
+                            c1.vx -= p * nx * RESTITUTION; c1.vy -= p * ny * RESTITUTION;
+                            c2.vx += p * nx * RESTITUTION; c2.vy += p * ny * RESTITUTION;
+
+                            if (Math.hypot(kx, ky) > 0.6) {
+                                playSynthSound('hit');
+                                if (c1.isStriker || c2.isStriker) addShockwave((c1.x + c2.x)/2, (c1.y + c2.y)/2, 45);
+                            }
+                        }
+                    }
+                }
+            } 
+
+            // पॉकेट चेकिंग और एनिमेशन एक्टिवेशन
+            for (let i = coins.length - 1; i >= 0; i--) {
+                let c = coins[i];
+                holes.forEach(hole => {
+                    if (Math.hypot(c.x - hole.x, c.y - hole.y) < hole.r - 2) {
+                        playSynthSound('pocket'); 
+                        
+                        if (c.isStriker) {
+                            strikerFouled = true; c.vx = 0; c.vy = 0;
+                            c.x = W / 2; c.y = currentPlayer === 1 ? H - 105 : 105;
+                        } else {
+                            let currentTurnOwnType = (currentPlayer === 1) ? p1CoinType : p2CoinType;
+
+                            // गोटी को एनीमेशन एरे में भेजें
+                            animateCoinToScoreboard(c, hole);
+
+                            if (c.type === 'queen') {
+                                queenSunkThisTurn = true; queenSunkByPlayer = currentPlayer; queenWaitingForCover = true;
+                                document.getElementById(`p${currentPlayer}-queen`).style.display = 'inline-block';
+                                showMessage("रानी डूबी! कवर लेना आवश्यक है।", false);
+                            } else {
+                                if (c.type === 'white') {
+                                    if (p1CoinType === 'white') scores.player1 += 1; else scores.player2 += 1;
+                                } else if (c.type === 'black') {
+                                    if (p1CoinType === 'black') scores.player1 += 1; else scores.player2 += 1;
+                                }
+                                if (c.type === currentTurnOwnType) ownCoinSunk = true; else opponentCoinSunk = true;
+                            }
+                            coins.splice(i, 1);
+                            updateScoreboardUI();
+                        }
+                    }
+                });
+            }
+
+            // टर्न ख़त्म होने पर रिज़ॉल्यूशन चेकिंग
+            if (turnInProgress && !moving && fallingCoins.length === 0 && activeRespawns.length === 0) {
+                strikerHistory = []; 
+                if (queenWaitingForCover && queenSunkByPlayer === currentPlayer && ownCoinSunk && strikerFouled) {
+                    showMessage("फाउल हुआ! रानी और 1 गोटी जुर्माना दोनों वापस बीच में!");
+                    respawnCoinWithAnimation('queen');
+                    document.getElementById('p1-queen').style.display = 'none';
+                    document.getElementById('p2-queen').style.display = 'none';
+                    queenWaitingForCover = false; queenSunkByPlayer = 0;
+
+                    if (currentPlayer === 1) { if(scores.player1 > 0) { scores.player1 -= 1; respawnCoinWithAnimation(p1CoinType); } } 
+                    else { if(scores.player2 > 0) { scores.player2 -= 1; respawnCoinWithAnimation(p2CoinType); } }
+                    
+                    updateScoreboardUI(); switchTurn(); return;
+                }
+
+                if (strikerFouled) {
+                    showMessage("फाउल! स्ट्राइकर डूबा। 1 गोटी का जुर्माना लगा।");
+                    if (currentPlayer === 1) { if(scores.player1 > 0) { scores.player1 -= 1; respawnCoinWithAnimation(p1CoinType); } } 
+                    else { if(scores.player2 > 0) { scores.player2 -= 1; respawnCoinWithAnimation(p2CoinType); } }
+                    updateScoreboardUI(); switchTurn(); return;
+                }
+
+                if (queenSunkThisTurn && ownCoinSunk) {
+                    showMessage("अविश्वसनीय! रानी और कवर एक साथ! +3 अंक बोनस।", false);
+                    if (currentPlayer === 1) scores.player1 += 3; else scores.player2 += 3;
+                    let winnerQueenTag = document.getElementById(`p${currentPlayer}-queen`);
+                    if(winnerQueenTag) { winnerQueenTag.style.animation = 'none'; winnerQueenTag.style.background = '#27ae60'; }
+                    queenWaitingForCover = false; queenSunkByPlayer = 0;
+                    updateScoreboardUI();
+                }
+
+                if (ownCoinSunk || queenSunkThisTurn) {
+                    striker.x = W / 2; striker.y = currentPlayer === 1 ? H - 105 : 105;
+                    striker.vx = 0; striker.vy = 0;
+                    p1Slider.value = 310; p2Slider.value = 310;
+                    turnInProgress = false; updateSliderPanels();
+                    // अगर कंप्यूटर का ही टर्न कंटिन्यू हुआ है तो उसे फिर से खेलने दें
+                    if(currentPlayer === 2 && vsComputer) setTimeout(makeComputerMove, 600);
+                } else {
+                    switchTurn();
+                }
+            }
+        }
+
+        function updateScoreboardUI() {
+            document.getElementById('p1-score').innerText = scores.player1;
+            document.getElementById('p2-score').innerText = scores.player2;
+            
+            if (scores.player1 >= 15) { triggerConfetti(); setTimeout(() => { alert("बधाई हो! खिलाड़ी 1 मैच जीत गया! 🏆"); }, 400); gameOver = true; gameReady = false; }
+            if (scores.player2 >= 15) { triggerConfetti(); setTimeout(() => { alert(vsComputer ? "कंप्यूटर मैच जीत गया! 🤖" : "खिलाड़ी 2 मैच जीत गया! 🏆"); }, 400); gameOver = true; gameReady = false; }
+        }
+
+        function drawCoins() {
+            if (!gameReady) return;
+
+            if (strikerHistory.length > 1) {
+                for (let i = 0; i < strikerHistory.length; i++) {
+                    let pt = strikerHistory[i]; let alpha = (i + 1) / strikerHistory.length * 0.28;
+                    ctx.save(); ctx.fillStyle = `rgba(223, 183, 108, ${alpha})`;
+                    ctx.beginPath(); ctx.arc(pt.x, pt.y, striker.r - 2, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+                }
+            }
+
+            shockwaves.forEach(sw => {
+                ctx.save(); ctx.strokeStyle = `rgba(223, 183, 108, ${sw.alpha})`; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+            });
+
+            // स्थिर और मूविंग गोटियाँ ड्रा करना
+            coins.forEach(c => {
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 4; ctx.shadowOffsetX = 2;
+                ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowColor = 'transparent';
+
+                ctx.strokeStyle = c.type === 'white' ? '#e0e0e0' : 'rgba(255,255,255,0.15)';
+                if (c.isStriker) ctx.strokeStyle = '#fff';
+                ctx.lineWidth = c.isStriker ? 3 : 1.5;
+                ctx.beginPath(); ctx.arc(c.x, c.y, c.r - 5, 0, Math.PI * 2); ctx.stroke();
+
+                ctx.fillStyle = c.type === 'white' ? '#dcdde1' : '#1e272e';
+                if(c.type === 'queen') ctx.fillStyle = '#fff';
+                if(c.isStriker) ctx.fillStyle = '#d63031';
+                ctx.beginPath(); ctx.arc(c.x, c.y, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            });
+
+            // सिनेमाई फॉलिंग और ट्रैवलिंग एनिमेशन रेंडरर (Falling & Flying Canvas Animation)
+            for (let i = fallingCoins.length - 1; i >= 0; i--) {
+                let fc = fallingCoins[i];
+                fc.progress += 0.04; // स्पीड रेट
+
+                ctx.save();
+                if (fc.stage === 'sink') {
+                    // स्टेज 1: पॉकेट के केंद्र की तरफ जाते हुए आकार छोटा (3D Sink Drop इफेक्ट)
+                    let t = fc.progress * 2; // इस स्टेज को थोड़ा तेज़ रखें
+                    if (t >= 1) { t = 1; fc.stage = 'fly'; fc.progress = 0; }
+                    
+                    let curX = fc.startX + (fc.holeX - fc.startX) * t;
+                    let curY = fc.startY + (fc.holeY - fc.startY) * t;
+                    let curR = fc.r * (1 - t * 0.6);
+
+                    ctx.fillStyle = fc.color; ctx.globalAlpha = 1 - t * 0.4;
+                    ctx.beginPath(); ctx.arc(curX, curY, curR, 0, Math.PI * 2); ctx.fill();
+                } else if (fc.stage === 'fly') {
+                    // स्टेज 2: पॉकेट से निकलकर हवा में तैरती हुई स्कोरबोर्ड की तरफ जाना
+                    let t = fc.progress;
+                    if (t >= 1) { fallingCoins.splice(i, 1); ctx.restore(); continue; }
+
+                    // पैराबोलिक आर्क (Curved fly path)
+                    let curX = fc.holeX + (fc.targetX - fc.holeX) * t;
+                    let curY = fc.holeY + (fc.targetY - fc.holeY) * t;
+                    let arcHeight = -120 * Math.sin(t * Math.PI); // उछाल का घुमाव
+                    
+                    let curR = (fc.r * 0.4) + (fc.r * 0.6) * Math.sin(t * Math.PI);
+
+                    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 15;
+                    ctx.fillStyle = fc.color; ctx.beginPath(); ctx.arc(curX, curY + arcHeight, curR, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // रिस्पॉनिंग एनिमेशन रेंडरर (Slide onto Board)
+            for (let i = activeRespawns.length - 1; i >= 0; i--) {
+                let rc = activeRespawns[i];
+                rc.progress += 0.035;
+
+                let t = rc.progress;
+                if (t >= 1) {
+                    // एनिमेशन पूरा होने पर मुख्य कॉइन एरे में डालें
+                    coins.push({ x: rc.targetX, y: rc.targetY, r: rc.r, vx: 0, vy: 0, color: rc.color, type: rc.type });
+                    activeRespawns.splice(i, 1);
+                    continue;
+                }
+
+                rc.currentX = rc.startX + (rc.targetX - rc.startX) * t;
+                rc.currentY = rc.startY + (rc.targetY - rc.startY) * t;
+
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'; ctx.shadowBlur = 5;
+                ctx.fillStyle = rc.color; ctx.globalAlpha = 0.9;
+                ctx.beginPath(); ctx.arc(rc.currentX, rc.currentY, rc.r, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+
+            // ऐमिंग और निशाना गाइडलाइन (Aim Line Engine)
+            if (striker.isDragging && !turnInProgress) {
+                let dx = striker.x - aimX; let dy = striker.y - aimY;
+                let pullDistance = Math.hypot(dx, dy); 
+
+                if (pullDistance > 5) {
+                    ctx.save(); ctx.strokeStyle = 'rgba(214, 48, 49, 0.4)'; ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 4]); ctx.beginPath(); ctx.moveTo(striker.x, striker.y);
+                    ctx.lineTo(striker.x + dx * 2.5, striker.y + dy * 2.5); ctx.stroke(); ctx.restore();
+
+                    // ऐमिंग लाइन प्रोजेक्शन
+                    ctx.save(); ctx.setLineDash([4, 4]);
+                    ctx.strokeStyle = (currentPlayer === 1) ? 'rgba(46, 213, 115, 0.7)' : 'rgba(52, 152, 219, 0.7)';
+                    ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(striker.x, striker.y);
+                    ctx.lineTo(striker.x + dx * 4, striker.y + dy * 4); ctx.stroke(); ctx.restore();
+
+                    ctx.save();
+                    let powerCircleRadius = Math.min(striker.r + (pullDistance * 0.25), 65);
+                    ctx.shadowBlur = 15; ctx.shadowColor = '#2ed573'; ctx.strokeStyle = '#2ed573'; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.arc(striker.x, striker.y, powerCircleRadius, 0, Math.PI * 2); ctx.stroke();
+                    ctx.fillStyle = 'rgba(46, 213, 115, 0.12)'; ctx.fill(); ctx.restore();
+                }
+            }
+        }
+
+        function resizeConfettiCanvas() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        window.addEventListener('click', initAudio); window.addEventListener('touchstart', initAudio);
+
+        function triggerConfetti() {
+            confettiParticles = [];
+            for (let i = 0; i < 120; i++) {
+                confettiParticles.push({
+                    x: Math.random() * confettiCanvas.width, y: Math.random() * -confettiCanvas.height, 
+                    r: 4 + Math.random() * 5, color: `hsl(${Math.random() * 360}, 90%, 65%)`, 
+                    speed: 3 + Math.random() * 4, wobble: Math.random() * 10, wobbleSpeed: 0.06
+                });
+            }
+        }
+
+        function drawConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            confettiParticles.forEach((p) => {
+                p.y += p.speed; p.wobble += p.wobbleSpeed; let xOffset = Math.sin(p.wobble) * 2;
+                confettiCtx.fillStyle = p.color; ctx.beginPath();
+                confettiCtx.arc(p.x + xOffset, p.y, p.r, 0, Math.PI * 2); confettiCtx.fill();
+            });
+        }
+
+        function gameLoop() {
+            drawBoard();
+            updatePhysics();
+            drawCoins();
+            drawConfetti();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
